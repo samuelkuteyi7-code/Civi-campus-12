@@ -7,7 +7,7 @@ from App.routes import auth
 from App.routes import sug
 from App.routes import promise
 from App.routes import report
-
+from App.routes import media
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="CiviAI Campus API")
@@ -24,7 +24,7 @@ app.include_router(auth.router)
 app.include_router(sug.router)
 app.include_router(promise.router)
 app.include_router(report.router)
-
+app.include_router(media.router)
 @app.get("/")
 def read_root():
     return {"message": "CiviAI Campus API is running"}
