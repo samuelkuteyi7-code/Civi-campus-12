@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CiviAI Campus</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root {
+    --navy:#111A2E; --bg:#F4F6FA; --card:#FFFFFF;
+    --border:#E7EAF1; --blue:#3E63F5; --blue-soft:#EAEEFF;
+    --green:#1FAE64; --green-soft:#E7F8EE;
+    --amber:#E8A317; --amber-soft:#FDF3DF;
+    --red:#E5484D; --red-soft:#FCEAEA;
+    --purple:#8B5CF6; --purple-soft:#F1EBFE;
+    --ink:#111827; --muted:#6B7280; --muted2:#9AA3B2;
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; font-family:'Inter',sans-serif; background:#0B0F1A; color:var(--ink); }
+
+  .phone-wrap { max-width:420px; margin:0 auto; min-height:100vh; background:var(--bg); position:relative; }
+  .screen { display:none; padding-bottom:78px; min-height:100vh; }
+  .screen.active { display:block; }
+
+  /* ---- auth ---- */
+  #authScreen { padding:40px 22px; background:var(--navy); min-height:100vh; color:#fff; }
+  #authScreen .cap-big { width:52px; height:52px; border-radius:14px; background:linear-gradient(135deg,var(--blue),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:24px; margin-bottom:16px; }
+  #authScreen h1 { font-family:'Sora',sans-serif; font-size:23px; margin:0 0 4px 0; }
+  #authScreen .sub { font-size:13px; color:#AEB8D6; margin-bottom:26px; }
+  #authScreen input, #authScreen select { width:100%; padding:13px; margin-bottom:10px; border-radius:10px; border:1px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.06); color:#fff; font-size:13.5px; }
+  #authScreen input::placeholder { color:#8592B0; }
+  #authScreen button.primary { width:100%; padding:14px; border:none; border-radius:12px; background:var(--blue); color:#fff; font-family:'Sora',sans-serif; font-weight:700; font-size:14px; margin-top:8px; }
+  #authScreen .toggle { text-align:center; font-size:12.5px; color:#AEB8D6; margin-top:16px; }
+  #authScreen .toggle a { color:#fff; font-weight:600; text-decoration:underline; cursor:pointer; }
+  #authScreen .err { background:rgba(229,72,77,0.15); color:#FF9A9E; padding:10px 12px; border-radius:8px; font-size:12.5px; margin-bottom:10px; display:none; }
+
+  .topbar { background:var(--navy); color:#fff; padding:18px 18px 22px 18px; border-radius:0 0 20px 20px; }
+  .topbar .brand { display:flex; align-items:center; gap:9px; margin-bottom:14px; }
+  .brand .cap { width:30px; height:30px; border-radius:8px; background:linear-gradient(135deg,var(--blue),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:15px; }
+  .brand .name { font-family:'Sora',sans-serif; font-weight:800; font-size:17px; letter-spacing:0.2px; }
+  .topbar .greet { font-family:'Sora',sans-serif; font-weight:700; font-size:19px; margin-bottom:3px; }
+  .topbar .sub { font-size:12.5px; color:#AEB8D6; }
+
+  .content { padding:16px; }
+
+  .qa-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:18px; }
+  .qa-tile { border-radius:14px; padding:16px 14px; color:#fff; cursor:pointer; }
+  .qa-tile .qa-icon { font-size:20px; margin-bottom:22px; display:block; }
+  .qa-tile .qa-label { font-family:'Sora',sans-serif; font-weight:700; font-size:13.5px; }
+  .qa-tile.blue { background:linear-gradient(150deg,#3E63F5,#2C48D1); }
+  .qa-tile.green { background:linear-gradient(150deg,#1FAE64,#158A4E); }
+  .qa-tile.purple { background:linear-gradient(150deg,#8B5CF6,#6D3FE0); }
+  .qa-tile.amber { background:linear-gradient(150deg,#F5A83E,#DD8A1B); }
+
+  .section-title { display:flex; justify-content:space-between; align-items:center; margin:20px 0 10px 0; }
+  .section-title h3 { font-family:'Sora',sans-serif; font-size:14.5px; margin:0; }
+  .section-title span { font-size:11.5px; color:var(--blue); font-weight:600; }
+
+  .empty-note { text-align:center; padding:24px 10px; color:var(--muted); font-size:12.5px; }
+
+  .bottomnav { position:fixed; bottom:0; left:50%; transform:translateX(-50%); width:100%; max-width:420px; background:#fff; border-top:1px solid var(--border); display:flex; justify-content:space-around; padding:9px 0 11px 0; z-index:20; }
+  .navitem { text-align:center; font-size:9.5px; color:var(--muted2); font-family:'Inter',sans-serif; font-weight:600; cursor:pointer; }
+  .navitem.active { color:var(--blue); }
+  .navitem .navicon { font-size:18px; display:block; margin-bottom:2px; }
+
+  .sub-header { display:flex; align-items:center; gap:10px; padding:16px 16px 12px 16px; background:#fff; border-bottom:1px solid var(--border); }
+  .sub-header .back { font-size:19px; cursor:pointer; color:var(--muted); }
+  .sub-header h2 { font-family:'Sora',sans-serif; font-size:16px; margin:0; }
+
+  label.field-label { font-size:11.5px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:0.4px; display:block; margin:14px 0 6px 0; }
+  textarea, select, input[type=text], input[type=file] { width:100%; border:1px solid var(--border); border-radius:10px; padding:12px; font-size:13.5px; font-family:'Inter',sans-serif; background:#fff; color:var(--ink); }
+  textarea { min-height:70px; resize:vertical; }
+  .submit-btn { width:100%; background:var(--blue); color:#fff; border:none; border-radius:12px; padding:14px; font-family:'Sora',sans-serif; font-weight:700; font-size:14px; margin-top:20px; }
+  .anon-note { display:flex; gap:8px; align-items:flex-start; font-size:11px; color:var(--muted); margin-top:12px; background:var(--blue-soft); padding:10px 12px; border-radius:10px; }
+  .toast-msg { text-align:center; font-size:12.5px; padding:10px; border-radius:10px; margin-top:10px; display:none; }
+  .toast-msg.show { display:block; }
+  .toast-msg.success { background:var(--green-soft); color:var(--green); }
+  .toast-msg.error { background:var(--red-soft); color:var(--red); }
+
+  .gov-header { background:var(--navy); color:#fff; padding:18px; border-radius:0 0 18px 18px; }
+  .gov-header .g-title { font-family:'Sora',sans-serif; font-weight:800; font-size:17px; }
+  .gov-header .g-sub { font-size:11.5px; color:#AEB8D6; margin-top:2px; }
+  .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0; }
+  .stat-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; }
+  .stat-card .s-num { font-family:'Sora',sans-serif; font-size:23px; font-weight:800; }
+  .stat-card .s-label { font-size:11px; color:var(--muted); margin-top:2px; }
+  .stat-card.blue .s-num { color:var(--blue); }
+  .stat-card.green .s-num { color:var(--green); }
+  .stat-card.amber .s-num { color:var(--amber); }
+  .stat-card.red .s-num { color:var(--red); }
+
+  .donut-wrap { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:16px; display:flex; align-items:center; gap:16px; }
+  .donut { width:88px; height:88px; border-radius:50%; flex-shrink:0; position:relative; }
+  .donut::after { content:""; position:absolute; inset:14px; background:var(--card); border-radius:50%; }
+  .legend-item { display:flex; align-items:center; gap:7px; font-size:11.5px; margin-bottom:6px; }
+  .legend-dot { width:9px; height:9px; border-radius:3px; }
+
+  .view-all-btn { width:100%; background:var(--navy); color:#fff; border:none; border-radius:12px; padding:13px; font-family:'Sora',sans-serif; font-weight:700; font-size:13.5px; margin-top:16px; }
+
+  .filter-row { display:flex; gap:7px; overflow-x:auto; padding:14px 16px 4px 16px; background:#fff; border-bottom:1px solid var(--border); }
+  .filter-chip { flex-shrink:0; font-size:11.5px; font-weight:600; padding:7px 13px; border-radius:20px; background:var(--bg); color:var(--muted); border:1px solid var(--border); white-space:nowrap; cursor:pointer; }
+  .filter-chip.active { background:var(--navy); color:#fff; border-color:var(--navy); }
+
+  .promise-card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:14px; margin-bottom:11px; }
+  .promise-card .p-top { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:8px; }
+  .promise-card .p-title { font-family:'Sora',sans-serif; font-weight:700; font-size:13.5px; max-width:75%; }
+  .status-pill { font-size:9.5px; font-weight:700; padding:4px 9px; border-radius:20px; white-space:nowrap; }
+  .status-pill.completed { background:var(--green-soft); color:var(--green); }
+  .status-pill.in_progress { background:var(--amber-soft); color:var(--amber); }
+  .status-pill.not_started { background:var(--red-soft); color:var(--red); }
+  .promise-card .p-dept { font-size:11px; color:var(--muted); margin-bottom:10px; }
+  .progress-track { background:#EEF0F5; border-radius:20px; height:7px; overflow:hidden; margin-bottom:5px; }
+  .progress-fill { height:100%; border-radius:20px; }
+  .progress-fill.completed { background:var(--green); }
+  .progress-fill.in_progress { background:var(--amber); }
+  .progress-fill.not_started { background:var(--red); }
+  .promise-card .p-meta { display:flex; justify-content:space-between; font-size:10.5px; color:var(--muted2); }
+
+  .news-item { display:flex; gap:11px; background:#fff; border:1px solid var(--border); border-radius:12px; padding:11px; margin-bottom:9px; align-items:center; }
+</style>
+</head>
+<body>
+
+<!-- ============ AUTH ============ -->
+<div id="authScreen">
+  <div class="cap-big">🎓</div>
+  <h1 id="authTitle">Welcome to CiviAI Campus</h1>
+  <div class="sub" id="authSub">Log in to your campus account</div>
+
+  <div class="err" id="authErr"></div>
+
+  <div id="loginFields">
+    <input type="text" id="loginEmail" placeholder="Email">
+    <input type="text" id="loginPassword" placeholder="Password" type="password">
+  </div>
+
+  <div id="registerFields" style="display:none">
+    <input type="text" id="regName" placeholder="Full name">
+    <input type="text" id="regEmail" placeholder="Email">
+    <input type="password" id="regPassword" placeholder="Password">
+    <input type="text" id="regInstitution" placeholder="Institution (e.g. University of Lagos)">
+    <input type="text" id="regDepartment" placeholder="Department (optional)">
+    <input type="text" id="regMatric" placeholder="Matric number (optional)">
+  </div>
+
+  <button class="primary" id="authSubmitBtn" onclick="submitAuth()">Log In</button>
+  <div class="toggle" id="authToggle">Don't have an account? <a onclick="switchAuthMode()">Register</a></div>
+</div>
+
+<div class="phone-wrap" id="mainApp" style="display:none">
+
+  <div class="screen active" id="screen-home">
+    <div class="topbar">
+      <div class="brand"><div class="cap">🎓</div><div class="name">CiviAI Campus</div></div>
+      <div class="greet" id="homeGreeting">Good morning 👋</div>
+      <div class="sub" id="homeInstitution">Stay informed. Stay involved. Make impact.</div>
+    </div>
+    <div class="content">
+      <div class="qa-grid">
+        <div class="qa-tile blue" onclick="showScreen('report')"><span class="qa-icon">📝</span><span class="qa-label">Report Issue</span></div>
+        <div class="qa-tile green" onclick="showScreen('promises')"><span class="qa-icon">📜</span><span class="qa-label">Track Promises</span></div>
+        <div class="qa-tile purple" onclick="showScreen('newsroom')"><span class="qa-icon">💬</span><span class="qa-label">Newsroom</span></div>
+        <div class="qa-tile amber" onclick="showScreen('governance')"><span class="qa-icon">🏛️</span><span class="qa-label">Governance</span></div>
+      </div>
+      <div class="section-title"><h3>Getting Started</h3></div>
+      <div class="empty-note">Report an issue or check your SUG's promise tracker to get started.</div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-report">
+    <div class="sub-header"><span class="back" onclick="showScreen('home')">&larr;</span><h2>Report a Campus Issue</h2></div>
+    <div class="content">
+      <label class="field-label">What happened?</label>
+      <textarea id="reportDescription" placeholder="Describe the issue in detail..."></textarea>
+
+      <label class="field-label">Category</label>
+      <select id="reportCategory"><option value="">Select category</option><option>Water</option><option>Electricity</option><option>Accommodation</option><option>Academic</option><option>Other</option></select>
+
+      <label class="field-label">Location</label>
+      <input type="text" id="reportLocation" placeholder="e.g. Hall 4, Block A">
+
+      <label class="field-label">Photo (optional)</label>
+      <input type="file" id="reportPhoto" accept="image/*" onchange="uploadReportPhoto(this)">
+      <div id="reportPhotoStatus" style="font-size:11.5px;color:var(--blue);margin-top:4px"></div>
+
+      <button class="submit-btn" onclick="submitReport()">Submit Report</button>
+      <div class="toast-msg" id="reportToast"></div>
+      <div class="anon-note">🔒 Your report is anonymous to the public. We will notify you about updates.</div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-governance">
+    <div class="gov-header">
+      <div class="g-title" id="govInstitution">Governance</div>
+      <div class="g-sub">Students' Union Government</div>
+    </div>
+    <div class="content">
+      <div class="stat-grid" id="govStatGrid">
+        <div class="stat-card blue"><div class="s-num">-</div><div class="s-label">Promises Tracked</div></div>
+        <div class="stat-card green"><div class="s-num">-</div><div class="s-label">Completed</div></div>
+        <div class="stat-card amber"><div class="s-num">-</div><div class="s-label">In Progress</div></div>
+        <div class="stat-card red"><div class="s-num">-</div><div class="s-label">Not Started</div></div>
+      </div>
+
+      <div class="section-title"><h3>Performance Summary</h3></div>
+      <div class="donut-wrap">
+        <div class="donut" id="govDonut"></div>
+        <div id="govLegend"></div>
+      </div>
+
+      <button class="view-all-btn" onclick="showScreen('promises')">View All Promises</button>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-promises">
+    <div class="sub-header"><span class="back" onclick="showScreen('home')">&larr;</span><h2>Promise Tracker</h2></div>
+    <div class="filter-row" id="promiseFilterRow">
+      <div class="filter-chip active" data-status="">All</div>
+      <div class="filter-chip" data-status="completed">Completed</div>
+      <div class="filter-chip" data-status="in_progress">In Progress</div>
+      <div class="filter-chip" data-status="not_started">Not Started</div>
+    </div>
+    <div class="content" id="promiseList">
+      <div class="empty-note">Loading...</div>
+    </div>
+  </div>
+
+  <div class="screen" id="screen-newsroom">
+    <div class="sub-header"><span class="back" onclick="showScreen('home')">&larr;</span><h2>Newsroom</h2></div>
+    <div class="content">
+      <div class="empty-note">Campus Newsroom is coming soon.</div>
+    </div>
+  </div>
+
+  <div class="bottomnav">
+    <div class="navitem active" data-screen="home" onclick="showScreen('home')"><span class="navicon">🏠</span>Home</div>
+    <div class="navitem" data-screen="report" onclick="showScreen('report')"><span class="navicon">📝</span>Report</div>
+    <div class="navitem" data-screen="governance" onclick="showScreen('governance')"><span class="navicon">🏛️</span>Governance</div>
+    <div class="navitem" data-screen="newsroom" onclick="showScreen('newsroom')"><span class="navicon">📰</span>Newsroom</div>
+    <div class="navitem" onclick="logout()"><span class="navicon">🚪</span>Log Out</div>
+  </div>
+</div>
+
+<script>
+const SERVER_URL = 'https://civi-campus-12.fastapicloud.dev';
+let token = null;
+let currentUser = null;
+let isRegisterMode = false;
+let allPromises = [];
+
+function switchAuthMode() {
+  isRegisterMode = !isRegisterMode;
+  document.getElementById('loginFields').style.display = isRegisterMode ? 'none' : 'block';
+  document.getElementById('registerFields').style.display = isRegisterMode ? 'block' : 'none';
+  document.getElementById('authTitle').textContent = isRegisterMode ? 'Create your account' : 'Welcome to CiviAI Campus';
+  document.getElementById('authSub').textContent = isRegisterMode ? 'Join your campus community' : 'Log in to your campus account';
+  document.getElementById('authSubmitBtn').textContent = isRegisterMode ? 'Register' : 'Log In';
+  document.getElementById('authToggle').innerHTML = isRegisterMode
+    ? 'Already have an account? <a onclick="switchAuthMode()">Log In</a>'
+    : "Don't have an account? <a onclick=\"switchAuthMode()\">Register</a>";
+  document.getElementById('authErr').style.display = 'none';
+}
+
+async function submitAuth() {
+  const errEl = document.getElementById('authErr');
+  errEl.style.display = 'none';
+  try {
+    let res, data;
+    if (isRegisterMode) {
+      const payload = {
+        name: document.getElementById('regName').value.trim(),
+        email: document.getElementById('regEmail').value.trim(),
+        password: document.getElementById('regPassword').value,
+        institution: document.getElementById('regInstitution').value.trim(),
+        department: document.getElementById('regDepartment').value.trim() || null,
+        matric_number: document.getElementById('regMatric').value.trim() || null
+      };
+      if (!payload.name || !payload.email || !payload.password || !payload.institution) {
+        errEl.textContent = 'Please fill in name, email, password, and institution.';
+        errEl.style.display = 'block';
+        return;
+      }
+      res = await fetch(SERVER_URL + '/auth/register', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    } else {
+      const payload = {
+        email: document.getElementById('loginEmail').value.trim(),
+        password: document.getElementById('loginPassword').value
+      };
+      res = await fetch(SERVER_URL + '/auth/login', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+      });
+    }
+    data = await res.json();
+    if (!res.ok) {
+      errEl.textContent = data.detail || 'Something went wrong.';
+      errEl.style.display = 'block';
+      return;
+    }
+    token = data.token;
+    currentUser = { name: data.name, email: data.email, institution: data.institution, role: data.role };
+    localStorage.setItem('campusToken', token);
+    localStorage.setItem('campusUser', JSON.stringify(currentUser));
+    enterApp();
+  } catch (err) {
+    errEl.textContent = 'Connection error. Please try again.';
+    errEl.style.display = 'block';
+  }
+}
+
+function enterApp() {
+  document.getElementById('authScreen').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'block';
+  const firstName = (currentUser.name || 'there').split(' ')[0];
+  document.getElementById('homeGreeting').textContent = 'Good day, ' + firstName + ' 👋';
+  document.getElementById('homeInstitution').textContent = currentUser.institution;
+  document.getElementById('govInstitution').textContent = currentUser.institution;
+  showScreen('home');
+}
+
+function logout() {
+  token = null;
+  currentUser = null;
+  localStorage.removeItem('campusToken');
+  localStorage.removeItem('campusUser');
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('authScreen').style.display = 'block';
+}
+
+function tryRestoreSession() {
+  const savedToken = localStorage.getItem('campusToken');
+  const savedUser = localStorage.getItem('campusUser');
+  if (savedToken && savedUser) {
+    token = savedToken;
+    currentUser = JSON.parse(savedUser);
+    enterApp();
+  }
+}
+tryRestoreSession();
+
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
+  document.getElementById('screen-' + name).classList.add('active');
+  document.querySelectorAll('.navitem[data-screen]').forEach(function(n) {
+    n.classList.toggle('active', n.dataset.screen === name);
+  });
+  window.scrollTo(0, 0);
+  if (name === 'promises' || name === 'governance') {
+    loadPromises(name);
+  }
+}
+
+let uploadedPhotoUrl = null;
+async function uploadReportPhoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const statusEl = document.getElementById('reportPhotoStatus');
+  statusEl.textContent = 'Uploading...';
+  const formData = new FormData();
+  formData.append('file', file);
+  try {
+    const res = await fetch(SERVER_URL + '/media/upload', {
+      method: 'POST', headers: { 'Authorization': 'Bearer ' + token }, body: formData
+    });
+    const data = await res.json();
+    if (!res.ok) { statusEl.textContent = 'Upload failed.'; return; }
+    uploadedPhotoUrl = data.url;
+    statusEl.textContent = 'Uploaded ✓';
+  } catch (err) {
+    statusEl.textContent = 'Connection error.';
+  }
+}
+
+async function submitReport() {
+  const description = document.getElementById('reportDescription').value.trim();
+  const toastEl = document.getElementById('reportToast');
+  toastEl.className = 'toast-msg';
+  if (!description) {
+    toastEl.textContent = 'Please describe the issue.';
+    toastEl.classList.add('show', 'error');
+    return;
+  }
+  const payload = {
+    description: description,
+    category: document.getElementById('reportCategory').value || null,
+    location: document.getElementById('reportLocation').value.trim() || null,
+    photo_url: uploadedPhotoUrl,
+    anonymous: true
+  };
+  try {
+    const res = await fetch(SERVER_URL + '/reports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      toastEl.textContent = 'Could not submit report.';
+      toastEl.classList.add('show', 'error');
+      return;
+    }
+    toastEl.textContent = 'Report submitted successfully!';
+    toastEl.classList.add('show', 'success');
+    document.getElementById('reportDescription').value = '';
+    document.getElementById('reportLocation').value = '';
+    document.getElementById('reportPhotoStatus').textContent = '';
+    uploadedPhotoUrl = null;
+    setTimeout(function() { showScreen('home'); }, 1200);
+  } catch (err) {
+    toastEl.textContent = 'Connection error.';
+    toastEl.classList.add('show', 'error');
+  }
+}
+
+async function loadPromises(context) {
+  try {
+    const res = await fetch(SERVER_URL + '/promises', { headers: { 'Authorization': 'Bearer ' + token } });
+    const data = await res.json();
+    if (!res.ok) return;
+    allPromises = data;
+    if (context === 'promises') renderPromiseList('');
+    if (context === 'governance') renderGovernance();
+  } catch (err) {
+    document.getElementById('promiseList').innerHTML = '<div class="empty-note">Connection error.</div>';
+  }
+}
+
+function renderPromiseList(filterStatus) {
+  const listEl = document.getElementById('promiseList');
+  const filtered = filterStatus ? allPromises.filter(function(p) { return p.status === filterStatus; }) : allPromises;
+  if (!filtered.length) {
+    listEl.innerHTML = '<div class="empty-note">No promises tracked yet for your institution.</div>';
+    return;
+  }
+  listEl.innerHTML = filtered.map(function(p) {
+    const statusLabel = p.status === 'completed' ? 'Completed' : (p.status === 'in_progress' ? 'In Progress' : 'Not Started');
+    return '<div class="promise-card">' +
+      '<div class="p-top"><div class="p-title">' + escapeHtml(p.title) + '</div><span class="status-pill ' + p.status + '">' + statusLabel + '</span></div>' +
+      '<div class="p-dept">' + escapeHtml(p.department || 'General') + '</div>' +
+      '<div class="progress-track"><div class="progress-fill ' + p.status + '" style="width:' + p.percent_complete + '%"></div></div>' +
+      '<div class="p-meta"><span>' + p.percent_complete + '%</span><span>' + (p.due_date ? 'Due ' + escapeHtml(p.due_date) : '') + '</span></div>' +
+      '</div>';
+  }).join('');
+}
+
+document.getElementById('promiseFilterRow')?.addEventListener('click', function(e) {
+  const chip = e.target.closest('.filter-chip');
+  if (!chip) return;
+  document.querySelectorAll('.filter-chip').forEach(function(c) { c.classList.remove('active'); });
+  chip.classList.add('active');
+  renderPromiseList(chip.dataset.status);
+});
+
+function renderGovernance() {
+  const total = allPromises.length;
+  const completed = allPromises.filter(function(p) { return p.status === 'completed'; }).length;
+  const inProgress = allPromises.filter(function(p) { return p.status === 'in_progress'; }).length;
+  const notStarted = allPromises.filter(function(p) { return p.status === 'not_started'; }).length;
+
+  document.getElementById('govStatGrid').innerHTML =
+    '<div class="stat-card blue"><div class="s-num">' + total + '</div><div class="s-label">Promises Tracked</div></div>' +
+    '<div class="stat-card green"><div class="s-num">' + completed + '</div><div class="s-label">Completed</div></div>' +
+    '<div class="stat-card amber"><div class="s-num">' + inProgress + '</div><div class="s-label">In Progress</div></div>' +
+    '<div class="stat-card red"><div class="s-num">' + notStarted + '</div><div class="s-label">Not Started</div></div>';
+
+  if (total === 0) {
+    document.getElementById('govDonut').style.background = '#EEF0F5';
+    document.getElementById('govLegend').innerHTML = '<div class="empty-note" style="padding:0">No promises tracked yet.</div>';
+    return;
+  }
+  const cPct = (completed / total * 100).toFixed(0);
+  const iPct = (inProgress / total * 100).toFixed(0);
+  document.getElementById('govDonut').style.background =
+    'conic-gradient(var(--green) 0% ' + cPct + '%, var(--amber) ' + cPct + '% ' + (parseInt(cPct) + parseInt(iPct)) + '%, var(--red) ' + (parseInt(cPct) + parseInt(iPct)) + '% 100%)';
+  document.getElementById('govLegend').innerHTML =
+    '<div class="legend-item"><span class="legend-dot" style="background:var(--green)"></span>Completed (' + cPct + '%)</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:var(--amber)"></span>In Progress (' + iPct + '%)</div>' +
+    '<div class="legend-item"><span class="legend-dot" style="background:var(--red)"></span>Not Started (' + (100 - cPct - iPct) + '%)</div>';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str || '';
+  return div.innerHTML;
+}
+</script>
+
+</body>
+</html>
