@@ -1,25 +1,25 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 
 
-class RegisterRequest(BaseModel):
+class SUGProfileCreate(BaseModel):
     name: str
-    email: str
-    password: str
+    position: str
+    term: Optional[str] = None
+    photo_url: Optional[str] = None
+    bio: Optional[str] = None
+
+
+class SUGProfileResponse(BaseModel):
+    id: int
     institution: str
-    department: Optional[str] = None
-    matric_number: Optional[str] = None
-
-
-class LoginRequest(BaseModel):
-    email: str
-    password: str
-
-
-class AuthResponse(BaseModel):
     name: str
-    email: str
-    institution: str
-    role: str
-    token: str
-    message: str
+    position: str
+    term: Optional[str] = None
+    photo_url: Optional[str] = None
+    bio: Optional[str] = None
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
