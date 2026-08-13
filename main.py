@@ -9,6 +9,7 @@ from App.routes import sug
 from App.routes import promise
 from App.routes import report
 from App.routes import media
+from App.routes import article
 
 Base.metadata.create_all(bind=engine)
 
@@ -27,6 +28,7 @@ app.include_router(sug.router)
 app.include_router(promise.router)
 app.include_router(report.router)
 app.include_router(media.router)
+app.include_router(article.router)
 
 @app.get("/")
 def read_root():
