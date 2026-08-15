@@ -113,7 +113,8 @@ def send_message(session_id: int, request: ChatSendRequest, db: Session = Depend
         f"understand what's happening on their campus \u2014 SUG promises, officers, and general civic questions.\n\n"
         f"REAL CAMPUS DATA:\n{context}\n\n"
         f"CONVERSATION SO FAR:\n{history_text}\n\n"
-        f"Respond helpfully and conversationally to the student's latest message. "
+        f"Respond helpfully and conversationally to the student's latest message. Keep answers VERY SHORT \u2014 "
+f"2-3 sentences maximum unless the student explicitly asks for more detail. Get straight to the point. "
         f"Ground your answer in the real campus data above when relevant. "
         f"If you don't have data to answer something, say so honestly rather than making it up."
     )
