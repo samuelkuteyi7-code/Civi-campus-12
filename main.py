@@ -11,6 +11,7 @@ from App.routes import report
 from App.routes import media
 from App.routes import article
 from App.routes import chat
+from App.routes import debate
 
 Base.metadata.create_all(bind=engine)
 
@@ -31,6 +32,7 @@ app.include_router(report.router)
 app.include_router(media.router)
 app.include_router(article.router)
 app.include_router(chat.router)
+app.include_router(debate.router)
 
 @app.get("/")
 def read_root():
