@@ -19,3 +19,4 @@ class Report(Base):
     official_response = Column(Text, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow)
+    location_id = Column(Integer, ForeignKey("campus_locations.id"), nullable=True)
