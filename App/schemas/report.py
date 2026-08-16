@@ -7,6 +7,7 @@ class ReportCreate(BaseModel):
     description: str
     category: Optional[str] = None
     location: Optional[str] = None
+    location_id: Optional[int] = None
     photo_url: Optional[str] = None
     anonymous: Optional[bool] = True
 
@@ -23,6 +24,7 @@ class ReportResponse(BaseModel):
     description: str
     category: Optional[str] = None
     location: Optional[str] = None
+    location_id: Optional[int] = None
     photo_url: Optional[str] = None
     status: str
     is_anonymous: int
