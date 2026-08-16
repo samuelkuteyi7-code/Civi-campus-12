@@ -15,6 +15,7 @@ from App.routes import debate
 from App.routes import insights
 from App.routes import notification
 from App.routes import profile
+from App.routes import location
 
 Base.metadata.create_all(bind=engine)
 
@@ -39,6 +40,7 @@ app.include_router(debate.router)
 app.include_router(insights.router)
 app.include_router(notification.router)
 app.include_router(profile.router)
+app.include_router(location.router)
 
 @app.get("/")
 def read_root():
