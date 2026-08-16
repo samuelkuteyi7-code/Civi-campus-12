@@ -16,3 +16,4 @@ class User(Base):
     role = Column(String, default="student")
     token = Column(String, unique=True, index=True, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
+    photo_url = Column(String, nullable=True)
