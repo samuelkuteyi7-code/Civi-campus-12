@@ -25,6 +25,7 @@ class ReportResponse(BaseModel):
     location: Optional[str] = None
     photo_url: Optional[str] = None
     status: str
+    is_anonymous: int
     assigned_department: Optional[str] = None
     official_response: Optional[str] = None
     created_at: datetime
