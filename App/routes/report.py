@@ -15,10 +15,11 @@ router = APIRouter(prefix="/reports", tags=["Issue Tracker"])
 def submit_report(request: ReportCreate, db: Session = Depends(get_db),
                    current_user: User = Depends(get_current_user)):
     report = Report(
-        user_id=None if request.anonymous else current_user.id,
+        user_id=current_user.id,
         institution=current_user.institution,
         description=request.description, category=request.category,
-        location=request.location, photo_url=request.photo_url, status="submitted"
+        location=request.location, photo_url=request.photo_url,
+        is_anonymous=1 if request.anonymous else 0, status="submitted"
     )
     db.add(report)
     db.commit()
@@ -33,6 +34,12 @@ def list_reports(db: Session = Depends(get_db),
         Report.created_at.desc()).all()
 
 
+@router.get("/mine", response_model=list[ReportResponse])
+def my_reports(db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
+    return db.query(Report).filter(Report.user_id == current_user.id).order_by(
+        Report.created_at.desc()).all()
+
+
 @router.get("/{report_id}", response_model=ReportResponse)
 def get_report(report_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_user)):
     report = db.query(Report).filter(
@@ -40,6 +47,8 @@ def get_report(report_id: int, db: Session = Depends(get_db), current_user: User
     ).first()
     if not report:
         raise HTTPException(status_code=404, detail="Report not found")
+    if report.user_id != current_user.id and current_user.role not in ("sug_officer", "admin"):
+        raise HTTPException(status_code=403, detail="Not authorized to view this report")
     return report
 
 
