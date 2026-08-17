@@ -20,7 +20,6 @@ def submit_report(request: ReportCreate, db: Session = Depends(get_db),
         description=request.description, category=request.category,
         location=request.location, location_id=request.location_id, photo_url=request.photo_url,
         is_anonymous=1 if request.anonymous else 0, status="submitted"
-    )"
     )
     db.add(report)
     db.commit()
