@@ -8,3 +8,5 @@ bcrypt
 python-multipart
 cloudinary
 requests
+slowapi
+sentry-sdk[fastapi]
