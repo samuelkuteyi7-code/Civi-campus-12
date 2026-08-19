@@ -8,7 +8,7 @@ from App.database.db import get_db
 from App.models.user import User
 from App.schemas.auth import RegisterRequest, LoginRequest, AuthResponse
 from App.config.settings import JWT_SECRET
-from App.core.limiter import limiter
+from App.config.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
