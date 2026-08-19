@@ -5,8 +5,7 @@ from fastapi import APIRouter, UploadFile, File, Depends, HTTPException, Request
 
 from App.routes.auth import get_current_user
 from App.models.user import User
-from App.core.limiter import limiter
-
+from App.config.limiter import limiter
 router = APIRouter(prefix="/media", tags=["Media"])
 
 cloudinary.config(
