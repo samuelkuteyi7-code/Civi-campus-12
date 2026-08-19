@@ -9,7 +9,7 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from App.core.limiter import limiter
+from App.config.limiter import limiter
 from App.database.db import Base, engine
 from App.routes import auth
 from App.routes import sug
@@ -23,6 +23,7 @@ from App.routes import insights
 from App.routes import notification
 from App.routes import profile
 from App.routes import location
+from App.routes import admin
 
 # --- Error monitoring ---
 # SENTRY_DSN must be set in your environment. If it's missing, Sentry simply
@@ -40,7 +41,7 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="CiviAI Campus API")
 
 # --- Rate limiting ---
-# Global default (100/min/IP) from App.core.limiter. Login, register, and
+# Global default (100/min/IP) from App.config.limiter. Login, register, and
 # media upload override this with tighter limits directly on their routes.
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -72,6 +73,7 @@ app.include_router(insights.router)
 app.include_router(notification.router)
 app.include_router(profile.router)
 app.include_router(location.router)
+app.include_router(admin.router)
 
 
 @app.get("/")
