@@ -1,3 +1,114 @@
-@app.get("/privacy")
-def privacy_policy():
-    return FileResponse("privacy.html")
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Privacy Policy — CiviAI Campus</title>
+<style>
+  :root {
+    --navy:#111A2E; --bg:#F4F6FA; --card:#FFFFFF;
+    --border:#E7EAF1; --blue:#3E63F5; --blue-soft:#EAEEFF;
+    --green:#1FAE64; --green-soft:#E7F8EE;
+    --amber:#E8A317; --amber-soft:#FDF3DF;
+    --red:#E5484D; --red-soft:#FCEAEA;
+    --ink:#111827; --muted:#6B7280; --muted2:#9AA3B2;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 32px 20px 80px; }
+  .back { color: var(--blue); text-decoration: none; font-weight: 600; font-size: 14px; }
+  h1 { font-size: 26px; color: var(--navy); margin: 20px 0 4px; }
+  .updated { color: var(--muted2); font-size: 13px; margin-bottom: 28px; }
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 20px 22px; margin-bottom: 16px;
+  }
+  h2 { font-size: 16px; color: var(--navy); margin: 0 0 10px; }
+  p, li { color: var(--ink); font-size: 14.5px; }
+  .muted { color: var(--muted); font-size: 13.5px; }
+  ul { margin: 8px 0; padding-left: 20px; }
+  .badge {
+    display: inline-block; background: var(--amber-soft); color: var(--amber);
+    font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 8px; margin-bottom: 10px;
+  }
+  a.contact { color: var(--blue); font-weight: 600; text-decoration: none; }
+  .foot { text-align: center; color: var(--muted2); font-size: 13px; margin-top: 32px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">← Back to CiviAI Campus</a>
+  <h1>Privacy Policy</h1>
+  <div class="updated">Last updated: August 19, 2026</div>
+
+  <div class="card">
+    <h2>1. What we collect</h2>
+    <p>When you use CiviAI Campus, we collect:</p>
+    <ul>
+      <li><strong>Account information</strong> — name, email, password (stored as a secure hash, never in plain text), institution, department, and matric number.</li>
+      <li><strong>Reports</strong> — the issue description, category, location, and any photo you attach.</li>
+      <li><strong>Chat messages</strong> — conversations you have with the CiviAI copilot.</li>
+      <li><strong>Debate and newsroom activity</strong> — posts, comments, and articles you submit (if you're a journalist or SUG officer).</li>
+      <li><strong>Profile photo</strong> — if you choose to upload one.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>2. Who can see your reports</h2>
+    <p>Reports are <strong>anonymous to the public</strong> — other students never see who submitted a report. However, your identity <strong>is visible to SUG officers and institution admins</strong> reviewing reports, so they can follow up or notify you about updates. It is not anonymous within the platform's administration.</p>
+  </div>
+
+  <div class="card">
+    <h2>3. Third parties we use</h2>
+    <p>We share limited data with the following services to run the app:</p>
+    <ul>
+      <li><strong>Cloudinary</strong> — hosts photos you upload (reports and profile pictures). Cloudinary processes and stores these images on our behalf.</li>
+      <li><strong>Sentry</strong> — receives technical error reports when something breaks, to help us fix bugs. This does not include your password or report content by default.</li>
+    </ul>
+    <p class="muted">We do not sell your data to advertisers or any other third party.</p>
+  </div>
+
+  <div class="card">
+    <span class="badge">Under review</span>
+    <h2>4. How long we keep your data</h2>
+    <p>We don't yet have a fixed retention period — data is currently kept for as long as your account is active or as needed to operate the platform. We're working to define specific limits, and this section will be updated once that's finalized. If you'd like your data deleted sooner, contact us (see below) and we'll handle it manually in the meantime.</p>
+  </div>
+
+  <div class="card">
+    <h2>5. How we protect your data</h2>
+    <ul>
+      <li>Passwords are hashed with bcrypt — we never store or see your actual password.</li>
+      <li>Login is protected against automated guessing attempts (rate limiting).</li>
+      <li>Access to the app's data is restricted to your institution — you only see content from your own campus.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h2>6. Your rights</h2>
+    <p>You can request to:</p>
+    <ul>
+      <li>See what data we hold about you</li>
+      <li>Correct inaccurate information</li>
+      <li>Delete your account and associated data</li>
+    </ul>
+    <p>To make a request, email us at <a class="contact" href="mailto:samuelkuteyi7@gmail.com">samuelkuteyi7@gmail.com</a>.</p>
+  </div>
+
+  <div class="card">
+    <h2>7. Changes to this policy</h2>
+    <p>If this policy changes in a meaningful way, we'll update the date at the top of this page. Continued use of CiviAI Campus after changes means you accept the updated policy.</p>
+  </div>
+
+  <div class="card">
+    <h2>8. Contact</h2>
+    <p>Questions about this policy or your data? Reach out to <a class="contact" href="mailto:samuelkuteyi7@gmail.com">samuelkuteyi7@gmail.com</a>.</p>
+  </div>
+
+  <div class="foot">CiviAI Campus</div>
+</div>
+</body>
+</html>
