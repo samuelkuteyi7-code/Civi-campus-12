@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 import bcrypt
 from jose import jwt, JWTError, ExpiredSignatureError
@@ -8,6 +8,7 @@ from App.database.db import get_db
 from App.models.user import User
 from App.schemas.auth import RegisterRequest, LoginRequest, AuthResponse
 from App.config.settings import JWT_SECRET
+from App.core.limiter import limiter
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
@@ -66,17 +67,20 @@ def require_role(allowed_roles: list[str]):
     return role_checker
 
 
+# 10/minute/IP — generous enough for real signups, tight enough to blunt
+# mass fake-account creation scripts.
 @router.post("/register", response_model=AuthResponse)
-def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    existing = db.query(User).filter(User.email == request.email).first()
+@limiter.limit("10/minute")
+def register(payload: RegisterRequest, request: Request, db: Session = Depends(get_db)):
+    existing = db.query(User).filter(User.email == payload.email).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
 
     new_user = User(
-        name=request.name, email=request.email,
-        hashed_password=hash_password(request.password),
-        institution=request.institution, department=request.department,
-        matric_number=request.matric_number, role="student"
+        name=payload.name, email=payload.email,
+        hashed_password=hash_password(payload.password),
+        institution=payload.institution, department=payload.department,
+        matric_number=payload.matric_number, role="student"
     )
     db.add(new_user)
     db.commit()
@@ -92,10 +96,14 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     )
 
 
+# 5/minute/IP — the key brute-force defense. A password-guessing script
+# gets throttled hard; a real user mistyping their password a few times
+# is unaffected.
 @router.post("/login", response_model=AuthResponse)
-def login(request: LoginRequest, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.email == request.email).first()
-    if not user or not verify_password(request.password, user.hashed_password):
+@limiter.limit("5/minute")
+def login(payload: LoginRequest, request: Request, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.email == payload.email).first()
+    if not user or not verify_password(payload.password, user.hashed_password):
         raise HTTPException(status_code=401, detail="Invalid email or password")
 
     token = create_jwt(user.id, user.email)
