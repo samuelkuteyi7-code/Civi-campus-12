@@ -10,12 +10,12 @@ from App.models.promise import Promise
 from App.models.sug_profile import SUGProfile
 from App.models.user import User
 from App.routes.auth import get_current_user
+from App.config.settings import ANTHROPIC_API_KEY
 from App.schemas.chat import ChatSessionResponse, ChatMessageResponse, ChatSendRequest, ChatSendResponse
 
 router = APIRouter(prefix="/chat", tags=["AI Campus Copilot"])
 
-# Reads ANTHROPIC_API_KEY from the environment automatically.
-claude_client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+claude_client = Anthropic(api_key=ANTHROPIC_API_KEY)
 CLAUDE_MODEL = "claude-sonnet-5"
 
 
