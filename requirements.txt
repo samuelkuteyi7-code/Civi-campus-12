@@ -10,3 +10,4 @@ cloudinary
 requests
 slowapi
 sentry-sdk[fastapi]
+anthropic
