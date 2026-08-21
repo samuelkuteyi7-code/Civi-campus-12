@@ -1,7 +1,8 @@
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from datetime import datetime
-import requests
+from anthropic import Anthropic
 
 from App.database.db import get_db
 from App.models.chat import ChatSession, ChatMessage
@@ -9,22 +10,24 @@ from App.models.promise import Promise
 from App.models.sug_profile import SUGProfile
 from App.models.user import User
 from App.routes.auth import get_current_user
-from App.config.settings import GEMINI_API_KEY
 from App.schemas.chat import ChatSessionResponse, ChatMessageResponse, ChatSendRequest, ChatSendResponse
 
 router = APIRouter(prefix="/chat", tags=["AI Campus Copilot"])
 
-GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent"
+# Reads ANTHROPIC_API_KEY from the environment automatically.
+claude_client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+CLAUDE_MODEL = "claude-sonnet-5"
 
 
-def call_gemini(prompt: str) -> str:
-    headers = {"Content-Type": "application/json"}
-    params = {"key": GEMINI_API_KEY}
-    payload = {"contents": [{"role": "user", "parts": [{"text": prompt}]}]}
+def call_claude(system_prompt: str, messages: list[dict]) -> str:
     try:
-        response = requests.post(GEMINI_URL, headers=headers, params=params, json=payload, timeout=45)
-        data = response.json()
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+        response = claude_client.messages.create(
+            model=CLAUDE_MODEL,
+            max_tokens=400,
+            system=system_prompt,
+            messages=messages,
+        )
+        return response.content[0].text
     except Exception as e:
         return f"Sorry, I couldn't process that right now. ({e})"
 
@@ -104,22 +107,24 @@ def send_message(session_id: int, request: ChatSendRequest, db: Session = Depend
 
     history = db.query(ChatMessage).filter(ChatMessage.chat_session_id == session_id).order_by(
         ChatMessage.created_at.asc()).all()
-    history_text = "\n".join(f"{m.role.upper()}: {m.content}" for m in history[-10:])
+    # Claude's messages API takes actual conversation turns rather than a
+    # flattened text blob — role/content pairs, same roles your DB already
+    # stores ("user"/"assistant"), so this maps over directly.
+    claude_messages = [{"role": m.role, "content": m.content} for m in history[-10:]]
 
     context = build_campus_context(db, current_user.institution)
 
-    prompt = (
+    system_prompt = (
         f"You are CiviAI Campus Copilot, an AI assistant helping students at {current_user.institution} "
         f"understand what's happening on their campus \u2014 SUG promises, officers, and general civic questions.\n\n"
         f"REAL CAMPUS DATA:\n{context}\n\n"
-        f"CONVERSATION SO FAR:\n{history_text}\n\n"
         f"Respond helpfully and conversationally to the student's latest message. Keep answers VERY SHORT \u2014 "
-f"2-3 sentences maximum unless the student explicitly asks for more detail. Get straight to the point. "
+        f"2-3 sentences maximum unless the student explicitly asks for more detail. Get straight to the point. "
         f"Ground your answer in the real campus data above when relevant. "
         f"If you don't have data to answer something, say so honestly rather than making it up."
     )
 
-    reply = call_gemini(prompt)
+    reply = call_claude(system_prompt, claude_messages)
 
     assistant_msg = ChatMessage(chat_session_id=session_id, role="assistant", content=reply)
     db.add(assistant_msg)
